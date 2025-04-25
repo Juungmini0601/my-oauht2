@@ -72,7 +72,7 @@ flowchart LR
 ```mermaid
 sequenceDiagram
     participant Client
-    participant Server as YourServer
+    participant Server
     participant OAuthProvider as OAuth Provider
     Client ->> Server: GET /api/auth/{provider}/login
     Server -->> Client: 302 Redirect → OAuthProvider 로그인 페이지
