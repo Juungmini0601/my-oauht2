@@ -8,6 +8,7 @@
 - KAKAO API, GOOGLE API
 - User data는 memory H2 기반으로 저장됩니다.
 - 시스템의 인증은 쿠키와 세션 기반으로 인증됩니다.
+- ❌ 로그인한 회원 정보 기능은 구현하지 않았습니다.
 
 ## Required
 
@@ -64,4 +65,62 @@ chmod +x run.sh
 flowchart LR
     A[API] --> B[Application]
     B --> C[Dao]
+```
+
+### Oauth Login Flow
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server as YourServer
+    participant OAuthProvider as OAuth Provider
+    Client ->> Server: GET /api/auth/{provider}/login
+    Server -->> Client: 302 Redirect → OAuthProvider 로그인 페이지
+    Client ->> OAuthProvider: 로그인 폼 제출
+    OAuthProvider -->> Client: 302 Redirect → /api/auth/{provider}/login/callback?code=abc123
+    Client ->> Server: GET /api/auth/{provider}/login/callback?code=abc123
+    Server ->> OAuthProvider: POST /token (code로 AccessToken 요청)
+    OAuthProvider -->> Server: AccessToken
+    Server ->> OAuthProvider: GET /userinfo (with AccessToken)
+    OAuthProvider -->> Server: 사용자 정보 (email, providerId, 등)
+    Server -->> Client: 로그인 처리 및 응답
+```
+
+### Multi Oauth Login Flow
+
+```mermaid
+sequenceDiagram
+    participant Controller as AuthController
+    participant Factory as OauthClientFactory
+    participant ClientImpl as OauthClient
+    participant AuthService
+    participant OauthRepo as OauthRepository
+    participant UserRepo as UserRepository
+    participant DB as Database
+    participant Session
+    Controller ->> Factory: getClient(provider)
+    Factory -->> Controller: OauthClient
+    Controller ->> ClientImpl: getUserInfo(code)
+    ClientImpl -->> Controller: OauthResponse(email, providerId, provider)
+    Controller ->> AuthService: oauth2Login(email, providerId, provider)
+    AuthService ->> OauthRepo: findByProviderIdAndProvider()
+    
+    alt Oauth 매핑 존재
+        OauthRepo -->> AuthService: Oauth → User
+        AuthService -->> Controller: User
+    else Oauth 매핑 없음
+        AuthService ->> UserRepo: findByEmail(email)
+        alt 기존 일반 회원 존재
+            UserRepo -->> AuthService: User
+            AuthService ->> OauthRepo: save(Oauth)
+            OauthRepo -->> DB: INSERT Oauth
+            AuthService -->> Controller: User
+        else 신규 유저
+            AuthService ->> UserRepo: save(new User + Oauth)
+            UserRepo -->> DB: INSERT User, INSERT Oauth
+            AuthService -->> Controller: new User
+        end
+    end
+
+    Controller ->> Session: session.setAttribute("LOGIN_USER", user)
 ```
