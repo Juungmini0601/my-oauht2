@@ -46,13 +46,13 @@ chmod +x run.sh
 ./run.sh
 ```
 
-2. H2데이터베이스 확인 `http://localhost:8080/h2-console`
+2. H2데이터베이스 확인 http://localhost:8080/h2-console
 
 - url: `jdbc:h2:mem:testdb`
 
-3. 카카오 소셜 로그인 엔드포인트 `http://localhost:8080/api/auth/kakao/login`
+3. 카카오 소셜 로그인 엔드포인트 http://localhost:8080/api/auth/kakao/login
 
-4. 구글 소셜 로그인 엔드포인트 `http://localhost:8080/api/auth/google/login`
+4. 구글 소셜 로그인 엔드포인트 http://localhost:8080/api/auth/google/login
 
 ### Model
 
