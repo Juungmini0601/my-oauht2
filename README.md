@@ -23,7 +23,7 @@
 
 ### 2. Application Properties 설정
 
-`application.properties` 에 네이버와 구글의 비밀 키 입력
+`application.properties` 에 카카오와 구글의 비밀 키 입력
 
 ```properties
 # Kakao Oauth 설정
